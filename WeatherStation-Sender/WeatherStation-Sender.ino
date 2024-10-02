@@ -3,19 +3,52 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const uint DHTPIN = 4;
-const uint DELAY = 1000 * 60;
+const uint DHT_PIN = 4;
+const uint DELAY = 1000 * 4;
 const char* SSID = "WeatherStation-Nic";
 const char* PASSWORD = "admin123456789";
 
+const int SENSOR_PIN = 35;       //Pin muss interruptfähig sein und darf kein AD2 Pin sein, weil diese durch das WLAN genutzt werden
+const long MESS_INTERVAL = 1000 * 2; //Mess-Intervall für Windmessung in Millisekunden
+const int WIND_FACTOR = 240; //Faktor mit Anemometer-Messung bestimmen
 
-Bonezegei_DHT11 dht(DHTPIN);
+TaskHandle_t taskWind;
+SemaphoreHandle_t i2cSemaphore;
+volatile float windSpeed;
+int interruptCounter = 0;
+
+Bonezegei_DHT11 dht(DHT_PIN);
 ulong lastSendTime = NULL;
 
 void setup() {
   Serial.begin(115200);
+
+  createSemaphore();
+
   dht.begin();
   setupWlan();
+
+  xTaskCreatePinnedToCore(
+    windTask,
+    "WindTask",
+    10000,
+    NULL,
+    1,
+    &taskWind, 
+    0);
+}
+
+void createSemaphore(){
+  i2cSemaphore = xSemaphoreCreateMutex();
+  xSemaphoreGive( ( i2cSemaphore) );
+}
+
+void lockVariable(){
+  xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+}
+
+void unlockVariable(){
+  xSemaphoreGive(i2cSemaphore);
 }
 
 void loop() {
@@ -26,15 +59,47 @@ void loop() {
   }
 }
 
+void windTask(void* pvParameters){
+  for(;;){
+    measureWindSpeed();
+  }
+}
+
+void measureWindSpeed(){
+  interruptCounter = 0;
+  attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), countUp, RISING);
+  delay(MESS_INTERVAL);
+  detachInterrupt(digitalPinToInterrupt(SENSOR_PIN));
+  lockVariable();
+  windSpeed = (float)interruptCounter / (float)MESS_INTERVAL * WIND_FACTOR;
+  unlockVariable();
+}
+
+void countUp() {
+    interruptCounter++;
+}
+
 void sendData(){
   if(!dht.getData())
     return;
+  lockVariable();
   float temp = dht.getTemperature();
   int hum = dht.getHumidity();
-  float windSpeed = 0; //TODO: Add WindSpeed
+  float windSpeedCopy = windSpeed;
+  unlockVariable();
   String json;
-  serializeJson(buildJSON(temp, hum, windSpeed), json);
+  serializeJson(buildJSON(temp, hum, windSpeedCopy), json);
+  
   sendDataToHub(json);
+  Serial.print("Temp: ");
+  Serial.print(temp);
+  Serial.print("---");
+  Serial.print("Hum: ");
+  Serial.print(hum);
+  Serial.print("---");
+  Serial.print("Wind: ");
+  Serial.print(windSpeedCopy);
+  Serial.println("---");
 }
 
 JsonDocument buildJSON(float temp, int hum, float windSpeed){

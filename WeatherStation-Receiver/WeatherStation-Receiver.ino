@@ -4,7 +4,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
-const uint DISPLAY_SWITCH = 10000;
+const uint DISPLAY_SWITCH = 1000 * 5;
 const char* SSID = "WeatherStation-Nic";
 const char* PASSWORD = "admin123456789";
 
@@ -22,10 +22,12 @@ ulong lastSendTime = NULL;
 DisplayState currentDisplayState = DisplayState::WIND;
 float currentTemperature = -1;
 int currentHumidity = -1;
-float currentWindspeed = -1;
+float currentWindSpeed = -1;
 
 void setup() {
   Serial.begin(115200);
+  lcd.init();
+  lcd.clear();
   lcd.begin(21, 22);  
   lcd.backlight();
 
@@ -71,7 +73,7 @@ void handle_OnReceiveData() {
   Serial.println("New Data:");
   Serial.printf("Temperature: %f\n", temperature);
   Serial.printf("Humidity: %i\n", humidity);
-  Serial.printf("Windspeed: %f\n", windSpeed);
+  Serial.printf("WindSpeed: %f\n", windSpeed);
   onReceiveData(temperature, humidity, windSpeed);
   server.send(200, "text/html", "OK"); 
 }
@@ -83,7 +85,7 @@ void handle_NotFound(){
 void onReceiveData(float temp, int hum, float wind){
   currentTemperature = temp;
   currentHumidity = hum;
-  currentWindspeed = wind;
+  currentWindSpeed = wind;
 }
 
 void displayData(){
@@ -92,7 +94,7 @@ void displayData(){
   switch(currentDisplayState){
     case DisplayState::WIND:
       name = "Wind";
-      value = String(currentWindspeed, 2) + " km/h";
+      value = String(currentWindSpeed, 2) + " km/h";
       break;
     case DisplayState::HUMIDITY:
       name = "Luftfeuchtigkeit";
