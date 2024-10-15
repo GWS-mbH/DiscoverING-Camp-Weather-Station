@@ -5,8 +5,9 @@
 #include <Wire.h>
 
 const uint DISPLAY_SWITCH = 1000 * 5;
-const char* SSID = "WeatherStation-Nic";
-const char* PASSWORD = "admin123456789";
+//TODO: Setup WIFI
+const char* SSID = "";
+const char* PASSWORD = "";
 
 enum DisplayState 
 {
@@ -67,9 +68,10 @@ void handle_OnReceiveData() {
     server.send(400, "application/json", "Invalid JSON");
     return;
   }
-  float temperature = doc["temperature"];
-  int humidity = doc["humidity"];
-  float windSpeed = doc["windSpeed"];
+  //TODO: Read Data
+  float temperature = 0; 
+  int humidity = 0;
+  float windSpeed = 0;
   Serial.println("New Data:");
   Serial.printf("Temperature: %f\n", temperature);
   Serial.printf("Humidity: %i\n", humidity);
@@ -83,26 +85,25 @@ void handle_NotFound(){
 }
 
 void onReceiveData(float temp, int hum, float wind){
-  currentTemperature = temp;
-  currentHumidity = hum;
-  currentWindSpeed = wind;
+  //TODO: Save Temperature
 }
 
 void displayData(){
   String name = "";
   String value = "";
+  //TODO: Write CurrentData to Display
   switch(currentDisplayState){
     case DisplayState::WIND:
-      name = "Wind";
-      value = String(currentWindSpeed, 2) + " km/h";
+      name = "TODO";
+      value = "TODO";
       break;
     case DisplayState::HUMIDITY:
-      name = "Luftfeuchtigkeit";
-      value = String(currentHumidity) + " %";
+      name = "TODO";
+      value = "TODO";
       break;
     case DisplayState::TEMPERATURE:
-      name = "Temperatur";
-      value = String(currentTemperature, 2) + " Grad";
+      name = "TODO";
+      value = "TODO";
       break;
   }
   lcd.clear();

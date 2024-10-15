@@ -5,8 +5,9 @@
 
 const uint DHT_PIN = 4;
 const uint DELAY = 1000 * 4;
-const char* SSID = "WeatherStation-Nic";
-const char* PASSWORD = "admin123456789";
+//TODO: Setup WIFI
+const char* SSID = "";
+const char* PASSWORD = "";
 
 const int SENSOR_PIN = 35;       //Pin muss interruptfähig sein und darf kein AD2 Pin sein, weil diese durch das WLAN genutzt werden
 const long MESS_INTERVAL = 1000 * 2; //Mess-Intervall für Windmessung in Millisekunden
@@ -83,8 +84,9 @@ void sendData(){
   if(!dht.getData())
     return;
   lockVariable();
-  float temp = dht.getTemperature();
-  int hum = dht.getHumidity();
+  //TODO: Get Temperature & Humidity from Sensor
+  float temp = -1;
+  int hum = -1;
   float windSpeedCopy = windSpeed;
   unlockVariable();
   String json;
@@ -104,9 +106,7 @@ void sendData(){
 
 JsonDocument buildJSON(float temp, int hum, float windSpeed){
   JsonDocument doc;
-  doc["temperature"] = temp;
-  doc["humidity"] = hum;
-  doc["windSpeed"] = windSpeed;
+  //TODO: Build JsonDocument
   return doc;
 }
 
