@@ -85,6 +85,7 @@ void sendData(){
     return;
   lockVariable();
   //TODO: Get Temperature & Humidity from Sensor
+  //Documentation: https://github.com/GWS-mbH/DiscoverING-Camp-Weather-Station/blob/main/libraries/Bonezegei_DHT11/src/Bonezegei_DHT11.h
   float temp = -1;
   int hum = -1;
   float windSpeedCopy = windSpeed;

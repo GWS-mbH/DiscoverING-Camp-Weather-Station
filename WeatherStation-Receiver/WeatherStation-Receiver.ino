@@ -11,9 +11,7 @@ const char* PASSWORD = "";
 
 enum DisplayState 
 {
-  WIND, 
-  TEMPERATURE, 
-  HUMIDITY
+  WIND //TODO: Add more states 
 };
 
 WebServer server(80);
@@ -21,9 +19,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 ulong lastSendTime = NULL;
 DisplayState currentDisplayState = DisplayState::WIND;
-float currentTemperature = -1;
-int currentHumidity = -1;
-float currentWindSpeed = -1;
+//TODO: Add more variables (Current Data => Wind / Temperature / Humidity)
 
 void setup() {
   Serial.begin(115200);
@@ -68,7 +64,7 @@ void handle_OnReceiveData() {
     server.send(400, "application/json", "Invalid JSON");
     return;
   }
-  //TODO: Read Data
+  //TODO: Read Data from JSON (Sender)
   float temperature = 0; 
   int humidity = 0;
   float windSpeed = 0;
@@ -97,14 +93,6 @@ void displayData(){
       name = "TODO";
       value = "TODO";
       break;
-    case DisplayState::HUMIDITY:
-      name = "TODO";
-      value = "TODO";
-      break;
-    case DisplayState::TEMPERATURE:
-      name = "TODO";
-      value = "TODO";
-      break;
   }
   lcd.clear();
   lcd.setCursor(0,0);
@@ -115,13 +103,10 @@ void displayData(){
 }
 
 DisplayState getNextState(){
+  //TODO: Implement State Machine
   switch(currentDisplayState){
     case DisplayState::WIND:
-      return DisplayState::HUMIDITY;
-    case DisplayState::HUMIDITY:
-      return DisplayState::TEMPERATURE;
-    case DisplayState::TEMPERATURE:
-      return DisplayState::WIND;
+      return DisplayState::WIND; //TODO: NEXT STATE
   }
   return DisplayState::WIND;
 }
