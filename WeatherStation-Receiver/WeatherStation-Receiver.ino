@@ -27,7 +27,7 @@ float currentWindSpeed = -1;
 
 void setup() {
   Serial.begin(115200);
-  lcd.init();
+  //lcd.init();
   lcd.clear();
   lcd.begin(21, 22);  
   lcd.backlight();
