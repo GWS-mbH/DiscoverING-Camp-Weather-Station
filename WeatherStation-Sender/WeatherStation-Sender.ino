@@ -111,6 +111,11 @@ JsonDocument buildJSON(float temp, int hum, float windSpeed){
 }
 
 void sendDataToHub(String json){
+  if (WiFi.status() != WL_CONNECTED){
+    WiFi.disconnect();
+    WiFi.reconnect();
+  }
+
   HTTPClient http;
   http.begin("http://192.168.4.1/data");
   http.addHeader("Content-Type", "application/json");
